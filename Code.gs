@@ -1,6 +1,6 @@
 function checkRecentAdminActivities() {
-  var webhookUrl = "https://discord.com/api/webhooks/1272142551322722326/c4J2sfX8hip7F74wMeBszcJuuSWFc6DBbSrPupngWGaGld3Dazj5OHfhowhkv4vkUTCi"; // Remplacez par votre URL de webhook Discord
-  var sharedDriveId = "1gMUbA-zf8RXAOlQt6oBTBxeMflhvylyo"; // Remplacez par l'ID de votre Drive partagé
+  var webhookUrl = "YOUR_WEBHOOK_URL"; // Remplacez par votre URL de webhook Discord
+  var sharedDriveId = "YOUR_DRIVE_S3_URL"; // Remplacez par l'ID de votre Drive partagé
 
   // Récupérer le dernier horodatage traité
   var properties = PropertiesService.getScriptProperties();
