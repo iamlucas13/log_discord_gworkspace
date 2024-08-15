@@ -1,5 +1,5 @@
 function checkRecentAdminActivities() {
-  var webhookUrl = "YOUR_DISCORD_WEBHOOK"; // Remplacez par votre URL de webhook Discord
+  var webhookUrl = "https://discord.com/api/webhooks/1272142551322722326/c4J2sfX8hip7F74wMeBszcJuuSWFc6DBbSrPupngWGaGld3Dazj5OHfhowhkv4vkUTCi"; // Remplacez par votre URL de webhook Discord
   var sharedDriveId = "1gMUbA-zf8RXAOlQt6oBTBxeMflhvylyo"; // Remplacez par l'ID de votre Drive partagé
 
   // Récupérer le dernier horodatage traité
@@ -67,6 +67,12 @@ function checkRecentAdminActivities() {
       } else if (eventType === "GROUP_SETTINGS" && eventName === "REMOVE_GROUP_MEMBER") {
         var groupName = event.events[0].parameters.find(param => param.name === "GROUP_EMAIL").value;
         actions.push(`${actorName} a retiré l'utilisateur ${target} du groupe ${groupName}.`);
+      } else if (eventType === "USER_SETTINGS" && eventName === "CREATE_USER") {
+        actions.push(`${actorName} a crée l'utilisateur ${target}.`);
+      } else if (eventType === "USER_SETTINGS" && eventName === "DELETE_USER") {
+        actions.push(`${actorName} a supprimé l'utilisateur ${target}.`);
+      } else if (eventType === "USER_SETTINGS" && eventName === "CHANGE_PASSWORD") {
+        actions.push(`${actorName} a modifié le mot de passe de l'utilisateur ${target}.`);
       }
     });
   }
