@@ -2,7 +2,7 @@ function checkRecentAdminActivities() {
   var webhookUrl = "YOUR_WEBHOOK_URL"; // Remplacez par votre URL de webhook Discord
   var sharedDriveId = "YOUR_DRIVE_S3_URL"; // Remplacez par l'ID de votre Drive partagé
 
-  // Récupérer le dernier horodatage traité
+// Récupérer le dernier horodatage traité
   var properties = PropertiesService.getScriptProperties();
   var lastProcessedTime = properties.getProperty('LAST_PROCESSED_TIME');
 
@@ -34,46 +34,48 @@ function checkRecentAdminActivities() {
 
   if (auditEvents && auditEvents.items) {
     Logger.log(`Nombre d'événements récupérés : ${auditEvents.items.length}`);
-    auditEvents.items.forEach(function(event) {
+    auditEvents.items.forEach(function (event) {
       var eventTime = event.id.time; // Horodatage de l'événement
       var eventType = event.events[0].type;
       var eventName = event.events[0].name;
-      var actorEmail = event.actor.email;
-      var actorName = getUserName(actorEmail); // Obtenir le nom complet de l'utilisateur
       var target = event.events[0].parameters && event.events[0].parameters.length > 0 ? event.events[0].parameters[0].value : "inconnu";
-
-      // Logs pour vérifier les types et noms d'événements capturés
-      Logger.log(`Événement capturé : ${JSON.stringify(event)}`);
 
       // Mettre à jour l'horodatage le plus récent si cet événement est plus récent
       if (eventTime > mostRecentEventTime) {
         mostRecentEventTime = eventTime;
       }
 
-      // Surveillance des événements spécifiques
+      // Surveillance des événements spécifiques (sans mentionner qui a fait l'action)
       if (eventType === "USER_SETTINGS" && eventName === "SUSPEND_USER") {
-        actions.push(`${actorName} a suspendu l'utilisateur ${target}.`);
+        actions.push(`L'utilisateur ${target} a été suspendu.`);
       } else if (eventType === "USER_SETTINGS" && eventName === "UNSUSPEND_USER") {
-        actions.push(`${actorName} a réactivé l'utilisateur ${target}.`);
+        actions.push(`L'utilisateur ${target} a été réactivé.`);
       } else if (eventType === "USER_SETTINGS" && eventName === "ADD_NICKNAME") {
         var alias = event.events[0].parameters.find(param => param.name === "USER_NICKNAME").value;
-        actions.push(`${actorName} a ajouté l'alias ${alias} à l'utilisateur ${target}.`);
+        actions.push(`L'alias ${alias} a été ajouté pour l'utilisateur ${target}.`);
       } else if (eventType === "USER_SETTINGS" && eventName === "REMOVE_NICKNAME") {
         var alias = event.events[0].parameters.find(param => param.name === "USER_NICKNAME").value;
-        actions.push(`${actorName} a supprimé l'alias ${alias} de l'utilisateur ${target}.`);
+        actions.push(`L'alias ${alias} a été supprimé de l'utilisateur ${target}.`);
       } else if (eventType === "GROUP_SETTINGS" && eventName === "ADD_GROUP_MEMBER") {
         var groupName = event.events[0].parameters.find(param => param.name === "GROUP_EMAIL").value;
-        actions.push(`${actorName} a ajouté l'utilisateur ${target} au groupe ${groupName}.`);
+        actions.push(`L'utilisateur ${target} a été ajouté au groupe ${groupName}.`);
       } else if (eventType === "GROUP_SETTINGS" && eventName === "REMOVE_GROUP_MEMBER") {
         var groupName = event.events[0].parameters.find(param => param.name === "GROUP_EMAIL").value;
-        actions.push(`${actorName} a retiré l'utilisateur ${target} du groupe ${groupName}.`);
+        actions.push(`L'utilisateur ${target} a été retiré du groupe ${groupName}.`);
+      } else if (eventType === "GROUP_SETTINGS" && eventName === "CREATE_GROUP") {
+        var groupName = event.events[0].parameters.find(param => param.name === "GROUP_EMAIL").value;
+        actions.push(`Le groupe ${groupName} a été créé.`);
+      } else if (eventType === "GROUP_SETTINGS" && eventName === "DELETE_GROUP") {
+        var groupName = event.events[0].parameters.find(param => param.name === "GROUP_EMAIL").value;
+        actions.push(`Le groupe ${groupName} a été supprimé.`);
       } else if (eventType === "USER_SETTINGS" && eventName === "CREATE_USER") {
-        actions.push(`${actorName} a crée l'utilisateur ${target}.`);
+        actions.push(`Le compte pour l'utilisateur ${target} a été créé.`);
       } else if (eventType === "USER_SETTINGS" && eventName === "DELETE_USER") {
-        actions.push(`${actorName} a supprimé l'utilisateur ${target}.`);
+        actions.push(`Le compte de l'utilisateur ${target} a été supprimé.`);
       } else if (eventType === "USER_SETTINGS" && eventName === "CHANGE_PASSWORD") {
-        actions.push(`${actorName} a modifié le mot de passe de l'utilisateur ${target}.`);
+        actions.push(`Le mot de passe de l'utilisateur ${target} a été modifié.`);
       }
+
     });
   }
 
@@ -133,17 +135,4 @@ function checkRecentAdminActivities() {
   // Ajouter un léger décalage pour éviter de rater les événements proches de l'horodatage
   var newLastProcessedTime = new Date(Date.parse(mostRecentEventTime) + 1000).toISOString();
   properties.setProperty('LAST_PROCESSED_TIME', newLastProcessedTime);
-}
-
-function getUserName(email) {
-  try {
-    var user = AdminDirectory.Users.get(email);
-    var givenName = user.name.givenName;
-    var familyName = user.name.familyName;
-    var initialFamilyName = familyName ? familyName.charAt(0).toUpperCase() : '';
-    return `${givenName} ${initialFamilyName}.`; // Format: "Lucas V."
-  } catch (e) {
-    Logger.log(`Erreur lors de la récupération du nom pour l'email ${email}: ${e.message}`);
-    return email; // Retourner l'email si l'utilisateur n'est pas trouvé
-  }
 }
