@@ -65,7 +65,13 @@ function checkRecentAdminActivities() {
       } else if (eventType === "GROUP_SETTINGS" && eventName === "CREATE_GROUP") {
         var groupName = event.events[0].parameters.find(param => param.name === "GROUP_EMAIL").value;
         actions.push(`Le groupe ${groupName} a été créé.`);
-      } else if (eventType === "GROUP_SETTINGS" && eventName === "DELETE_GROUP") {
+      }
+      else if (eventType === "GROUP_SETTINGS" && eventName === "CHANGE_GROUP_PERMISSION") {
+        var groupName = event.events[0].parameters.find(param => param.name === "GROUP_EMAIL").value;
+        var newPermissions = event.events[0].parameters.find(param => param.name === "PERMISSION_TYPE").value;
+        actions.push(`Les permissions du groupe ${groupName} ont été mises à jour : ${newPermissions}.`);
+      }
+      else if (eventType === "GROUP_SETTINGS" && eventName === "DELETE_GROUP") {
         var groupName = event.events[0].parameters.find(param => param.name === "GROUP_EMAIL").value;
         actions.push(`Le groupe ${groupName} a été supprimé.`);
       } else if (eventType === "USER_SETTINGS" && eventName === "CREATE_USER") {
